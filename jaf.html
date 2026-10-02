@@ -1,0 +1,1950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TTD Darshan Autofill Assistant</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  
+  <style>
+    body {
+      background-color: #FFFFFF;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #111827;
+      margin: 0;
+      padding: 0;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: #0284C7;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.2);
+    }
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #FFFFFF;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #E5E7EB;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #9CA3AF;
+    }
+  </style>
+</head>
+<body class="p-4 flex items-center justify-center min-h-screen transition-colors duration-300">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const InlineMemberCard = ({ member, index, onUpdate, onDelete, isSrivani = false, darkMode = false }) => {
+      const [expanded, setExpanded] = useState(false);
+      const [isEditing, setIsEditing] = useState(false);
+      const [editData, setEditData] = useState(member);
+
+      useEffect(() => setEditData(member), [member]);
+
+      const handleSave = (e) => {
+        e.stopPropagation();
+        onUpdate(editData);
+        setIsEditing(false);
+      };
+
+      return (
+        <div className={`border rounded-xl overflow-hidden shadow-sm mb-2 transition-all ${darkMode ? 'border-sky-800 bg-slate-800 text-sky-100' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`}>
+          <div className={`p-2.5 flex items-center justify-between cursor-pointer ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-[#F0F9FF]'}`} onClick={() => !isEditing && setExpanded(!expanded)}>
+            <div className="flex-1">
+              <p className={`font-bold text-xs ${darkMode ? 'text-sky-300' : 'text-[#111827]'}`}>{index + 1}. {member.name}</p>
+              <p className={`text-[10px] ${darkMode ? 'text-slate-400' : 'text-[#6B7280]'}`}>{member.idType} • {member.idNum}</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); setExpanded(true); }} className="px-2.5 py-1 bg-[#E0F2FE] hover:bg-[#F0F9FF] text-[#0284C7] rounded text-[10px] font-bold transition-colors">Edit</button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="px-2.5 py-1 bg-[#DC2626]/10 hover:bg-[#DC2626]/20 text-[#DC2626] rounded text-[10px] font-bold transition-colors">Delete</button>
+              <span className={`ml-1 font-bold text-xs ${darkMode ? 'text-sky-400' : 'text-[#0284C7]'}`}>{expanded ? '▲' : '▼'}</span>
+            </div>
+          </div>
+          
+          {expanded && (
+            <div className={`p-3 border-t ${darkMode ? 'border-sky-800 bg-slate-900/50' : 'border-[#E5E7EB] bg-[#FFFFFF]'}`}>
+              {isEditing ? (
+                <div className="space-y-2 text-xs">
+                   <div className="grid grid-cols-2 gap-2">
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Name</label><input className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} /></div>
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Age</label><input type="number" className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.age} onChange={e=>setEditData({...editData, age: parseInt(e.target.value) || ''})} /></div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-2">
+                     <div>
+                       <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Gender</label>
+                       <select className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.gender} onChange={e=>setEditData({...editData, gender: e.target.value})}>
+                          <option>Male</option><option>Female</option><option>Transgender</option>
+                       </select>
+                     </div>
+                     <div>
+                       <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Type</label>
+                       <select className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.idType} onChange={e=>setEditData({...editData, idType: e.target.value})}>
+                          <option>Aadhaar Card</option><option>Passport</option>
+                       </select>
+                     </div>
+                   </div>
+                   <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Number</label><input className={`w-full p-1.5 border rounded font-bold font-mono ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.idNum} onChange={e=>setEditData({...editData, idNum: e.target.value})} /></div>
+                   {!isSrivani && <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Gothram</label><input className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.gothram || ''} onChange={e=>setEditData({...editData, gothram: e.target.value})} /></div>}
+                   
+                   <div className="flex gap-2 justify-end pt-2">
+                     <button onClick={(e) => { e.stopPropagation(); setIsEditing(false); setEditData(member); }} className={`px-3 py-1.5 rounded-lg font-bold ${darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-[#E5E7EB] text-[#111827] hover:bg-[#9CA3AF]'}`}>Cancel</button>
+                     <button onClick={handleSave} className="px-3 py-1.5 bg-[#0284C7] hover:bg-[#0369A1] text-white rounded-lg font-bold shadow-sm">Update</button>
+                   </div>
+                </div>
+              ) : (
+                <div className={`grid grid-cols-2 gap-y-1.5 gap-x-2 text-[11px] ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>
+                   <p><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>Age:</strong> {member.age}</p>
+                   <p><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>Gender:</strong> {member.gender}</p>
+                   <p><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>ID Type:</strong> {member.idType}</p>
+                   <p><strong className={`font-mono ${darkMode ? 'text-white' : 'text-[#111827]'}`}>ID Num:</strong> {member.idNum}</p>
+                   {!isSrivani && member.gothram && <p className="col-span-2"><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>Gothram:</strong> {member.gothram}</p>}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const InlineGroupCard = ({ member, index, onUpdate, onDelete, darkMode = false }) => {
+      const [expanded, setExpanded] = useState(false);
+      const [isEditing, setIsEditing] = useState(false);
+      const [editData, setEditData] = useState(member);
+
+      useEffect(() => setEditData(member), [member]);
+
+      const handleSave = (e) => {
+        e.stopPropagation();
+        onUpdate(editData);
+        setIsEditing(false);
+      };
+
+      return (
+        <div className={`border rounded-xl overflow-hidden shadow-sm mb-2 transition-all ${darkMode ? 'border-sky-800 bg-slate-800 text-sky-100' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`}>
+          <div className={`p-2.5 flex items-center justify-between cursor-pointer ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-[#F0F9FF]'}`} onClick={() => !isEditing && setExpanded(!expanded)}>
+            <div className="flex-1">
+              <p className={`font-bold text-xs ${darkMode ? 'text-sky-300' : 'text-[#111827]'}`}>#{member.id} {member.name} {member.id === 1 ? "(Leader)" : ""}</p>
+              <p className={`text-[10px] ${darkMode ? 'text-slate-400' : 'text-[#6B7280]'}`}>{member.idType} • {member.idNumber}</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <button onClick={(e) => { e.stopPropagation(); setIsEditing(true); setExpanded(true); }} className="px-2.5 py-1 bg-[#E0F2FE] hover:bg-[#F0F9FF] text-[#0284C7] rounded text-[10px] font-bold transition-colors">Edit</button>
+              <button onClick={(e) => { e.stopPropagation(); onDelete(); }} className="px-2.5 py-1 bg-[#DC2626]/10 hover:bg-[#DC2626]/20 text-[#DC2626] rounded text-[10px] font-bold transition-colors">Delete</button>
+              <span className={`ml-1 font-bold text-xs ${darkMode ? 'text-sky-400' : 'text-[#0284C7]'}`}>{expanded ? '▲' : '▼'}</span>
+            </div>
+          </div>
+          
+          {expanded && (
+            <div className={`p-3 border-t ${darkMode ? 'border-sky-800 bg-slate-900/50' : 'border-[#E5E7EB] bg-[#FFFFFF]'}`}>
+              {isEditing ? (
+                <div className="space-y-2 text-xs">
+                   <div className="grid grid-cols-2 gap-2">
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Name</label><input className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.name} onChange={e=>setEditData({...editData, name: e.target.value})} /></div>
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Mobile</label><input className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.mobileNumber} onChange={e=>setEditData({...editData, mobileNumber: e.target.value})} /></div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-2">
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Age</label><input type="number" className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.age} onChange={e=>setEditData({...editData, age: parseInt(e.target.value) || ''})} /></div>
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Number</label><input className={`w-full p-1.5 border rounded font-bold font-mono ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.idNumber} onChange={e=>setEditData({...editData, idNumber: e.target.value})} /></div>
+                   </div>
+                   <div className="grid grid-cols-2 gap-2">
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>City</label><input className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.city} onChange={e=>setEditData({...editData, city: e.target.value})} /></div>
+                     <div><label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Pincode</label><input className={`w-full p-1.5 border rounded font-bold ${darkMode ? 'border-sky-700 bg-slate-800 text-sky-200' : 'border-[#E5E7EB] bg-[#FFFFFF] text-[#111827]'}`} value={editData.pincode} onChange={e=>setEditData({...editData, pincode: e.target.value})} /></div>
+                   </div>
+                   
+                   <div className="flex gap-2 justify-end pt-2">
+                     <button onClick={(e) => { e.stopPropagation(); setIsEditing(false); setEditData(member); }} className={`px-3 py-1.5 rounded-lg font-bold ${darkMode ? 'bg-slate-700 text-slate-300 hover:bg-slate-600' : 'bg-[#E5E7EB] text-[#111827] hover:bg-[#9CA3AF]'}`}>Cancel</button>
+                     <button onClick={handleSave} className="px-3 py-1.5 bg-[#0284C7] hover:bg-[#0369A1] text-white rounded-lg font-bold shadow-sm">Update</button>
+                   </div>
+                </div>
+              ) : (
+                <div className={`grid grid-cols-2 gap-y-1.5 gap-x-2 text-[11px] ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>
+                   <p><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>Age:</strong> {member.age}</p>
+                   <p><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>Mobile:</strong> {member.mobileNumber}</p>
+                   <p><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>ID Type:</strong> {member.idType}</p>
+                   <p><strong className={`font-mono ${darkMode ? 'text-white' : 'text-[#111827]'}`}>ID Num:</strong> {member.idNumber}</p>
+                   <p className="col-span-2"><strong className={darkMode ? 'text-white' : 'text-[#111827]'}>Location:</strong> {member.city}, {member.state} - {member.pincode}</p>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const SectionWrapper = ({ title, children, defaultOpen = true, containerClass = "", titleClass = "", headerClass = "", darkMode = false }) => {
+      const [isOpen, setIsOpen] = useState(defaultOpen);
+      const defaultContainer = darkMode ? "bg-slate-800 border-sky-800 text-slate-100" : "bg-[#FFFFFF] border-[#E5E7EB]";
+      const defaultTitle = darkMode ? "text-sky-300" : "text-[#0284C7]";
+      return (
+        <div className={`border rounded-xl transition-all duration-200 shadow-sm ${containerClass || defaultContainer}`}>
+          <div 
+            className={`px-4 py-3 flex items-center justify-between cursor-pointer select-none transition-colors rounded-t-xl ${!isOpen ? 'rounded-b-xl' : ''} ${darkMode ? 'hover:bg-slate-700/60' : 'hover:bg-[#F0F9FF]'} ${headerClass}`}
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <div className="flex-1">
+              {typeof title === 'string' ? <h4 className={`font-extrabold text-xs uppercase tracking-wide ${titleClass || defaultTitle}`}>{title}</h4> : title}
+            </div>
+            <span className={`font-bold text-xs ml-3 flex-shrink-0 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''} ${titleClass || defaultTitle}`}>▼</span>
+          </div>
+          {isOpen && (
+            <div className={`p-4 pt-3 space-y-3 border-t ${darkMode ? 'border-sky-900' : 'border-[#E5E7EB]'}`}>
+              {children}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    function App() {
+      const [viewMode, setViewMode] = useState("popup"); 
+      const [activeTab, setActiveTab] = useState("booking"); 
+      const [dashboardTab, setDashboardTab] = useState("dashboard"); 
+      const [defaultAction, setDefaultAction] = useState("fill_continue");
+      const [language, setLanguage] = useState("EN");
+      const [darkMode, setDarkMode] = useState(false);
+      const [showDisclaimerModal, setShowDisclaimerModal] = useState(false);
+      
+      const [selectedSetName, setSelectedSetName] = useState("Family Pack");
+      const [showSetDetails, setShowSetDetails] = useState(true);
+
+      useEffect(() => {
+        if (darkMode) {
+          document.body.style.backgroundColor = "#0F172A";
+        } else {
+          document.body.style.backgroundColor = "#FFFFFF";
+        }
+      }, [darkMode]);
+
+      const [pilgrimSets, setPilgrimSets] = useState([
+        { 
+          id: "s1", 
+          name: "Family Pack", 
+          members: [
+            { name: "Sappidi Mukhesh Reddy", age: 27, gender: "Male", idType: "Aadhaar Card", idNum: "489248928910", gothram: "Bharadwaja" },
+            { name: "Lakshmi Narayana Rao", age: 58, gender: "Male", idType: "Aadhaar Card", idNum: "812481243312", gothram: "Kashyapa" },
+            { name: "Sunitha Devi Rao", age: 53, gender: "Female", idType: "Aadhaar Card", idNum: "991099104421", gothram: "Vasishta" }
+          ]
+        },
+        {
+          id: "s2",
+          name: "Parents Set",
+          members: [
+            { name: "Venkateswara Rao", age: 65, gender: "Male", idType: "Aadhaar Card", idNum: "772481243312", gothram: "Gautama" },
+            { name: "Padmavathi Rao", age: 60, gender: "Female", idType: "Aadhaar Card", idNum: "901248928910", gothram: "Gautama" }
+          ]
+        },
+        {
+          id: "s3",
+          name: "Solo Booking",
+          members: [
+            { name: "Anand Verma", age: 29, gender: "Male", idType: "Passport", idNum: "Z4812390", gothram: "Atri" }
+          ]
+        }
+      ]);
+
+      const [newSetNameInput, setNewSetNameInput] = useState("Family Pack");
+      const [newName, setNewName] = useState("");
+      const [newAge, setNewAge] = useState("");
+      const [newGender, setNewGender] = useState("Male");
+      const [newIdType, setNewIdType] = useState("Aadhaar Card");
+      const [newIdNum, setNewIdNum] = useState("");
+      
+      const [addEmail, setAddEmail] = useState("");
+      const [addCity, setAddCity] = useState("");
+      const [addState, setAddState] = useState("");
+      const [addCountry, setAddCountry] = useState("India");
+      const [addPincode, setAddPincode] = useState("");
+      const [addGothram, setAddGothram] = useState("");
+
+      const [srivaniPreset, setSrivaniPreset] = useState("family");
+      const [advanceBooking, setAdvanceBooking] = useState(true);
+      const [breakDate, setBreakDate] = useState("2026-10-15");
+      const [laddus, setLaddus] = useState(4);
+      const [includeAcc, setIncludeAcc] = useState(true);
+      const [accDate, setAccDate] = useState("2026-09-15");
+      const [timeSlot, setTimeSlot] = useState("00:00 Hrs to 05:59 Hrs");
+      const [showSrivaniList, setShowSrivaniList] = useState(true);
+
+      const [srivaniMembers, setSrivaniMembers] = useState([
+        { name: "Raghavendra Rao", age: 52, gender: "Male", idType: "Aadhaar Card", idNum: "901248928910" },
+        { name: "Padma Rao", age: 48, gender: "Female", idType: "Aadhaar Card", idNum: "772481243312" },
+        { name: "Siddharth Rao", age: 24, gender: "Male", idType: "Passport", idNum: "Z4812390" }
+      ]);
+
+      const handleSrivaniPresetChange = (val) => {
+        setSrivaniPreset(val);
+        if (val === "family") {
+          setSrivaniMembers([
+            { name: "Raghavendra Rao", age: 52, gender: "Male", idType: "Aadhaar Card", idNum: "901248928910" },
+            { name: "Padma Rao", age: 48, gender: "Female", idType: "Aadhaar Card", idNum: "772481243312" },
+            { name: "Siddharth Rao", age: 24, gender: "Male", idType: "Passport", idNum: "Z4812390" },
+            { name: "Ananya Rao", age: 21, gender: "Female", idType: "Aadhaar Card", idNum: "654123987102" }
+          ]);
+        } else if (val === "vip") {
+          setSrivaniMembers([
+            { name: "Industrialist V. R. Gupta", age: 58, gender: "Male", idType: "Passport", idNum: "P9988776" },
+            { name: "Sunita Gupta", age: 54, gender: "Female", idType: "Passport", idNum: "P9988777" }
+          ]);
+        } else if (val === "solo") {
+          setSrivaniMembers([
+            { name: "Dr. K. S. Sharma", age: 45, gender: "Male", idType: "Aadhaar Card", idNum: "123456789012" }
+          ]);
+        }
+        addToast(`Loaded Srivani Preset: ${val.toUpperCase()}`);
+      };
+
+      const [srivaniNewName, setSrivaniNewName] = useState("");
+      const [srivaniNewAge, setSrivaniNewAge] = useState("");
+      const [srivaniNewGender, setSrivaniNewGender] = useState("Male");
+      const [srivaniNewIdType, setSrivaniNewIdType] = useState("Aadhaar Card");
+      const [srivaniNewIdNum, setSrivaniNewIdNum] = useState("");
+
+      const [sevaData, setSevaData] = useState({
+        idType: "Aadhaar Card",
+        idNumber: "678912345678",
+        mobileNumber: "9848022338",
+        name: "Srinivasa Prasad",
+        surname: "Vemuri",
+        fatherOrSpouseName: "Venkatacharyulu",
+        dob: "1988-08-15",
+        age: 38,
+        emailId: "srinivasa.vemuri@example.com",
+        bloodGroup: "B+",
+        gender: "Male",
+        mentallyFit: true,
+        physicallyFit: true,
+        qualification: "Post Graduate",
+        profession: "IT Professional",
+        areaOfInterest: "Temple Services",
+        employeeId: "EMP-9021",
+        designation: "Manager",
+        specialisation: "Administration",
+        placeOfWorking: "Hyderabad",
+        country: "India",
+        pincode: "500081",
+        state: "Telangana",
+        district: "Rangareddy",
+        mandal: "Serilingampally",
+        city: "Hyderabad",
+        street: "Gachibowli Main Road",
+        doorNumber: "4-12/A",
+        nearestTemple: "Tirumala Balaji"
+      });
+      const [isEditingSeva, setIsEditingSeva] = useState(false);
+
+      const [selectedGroupMember, setSelectedGroupMember] = useState(1);
+      const [groupMembers, setGroupMembers] = useState(
+        Array.from({ length: 15 }, (_, i) => ({
+          id: i + 1,
+          role: i === 0 ? "Team Leader" : `Team Member ${i + 1}`,
+          idType: "Aadhaar Card",
+          idNumber: i === 0 ? "678912345678" : `98765432${i < 10 ? '0' + i : i}`,
+          name: i === 0 ? "Srinivasa Prasad" : `Volunteer ${i + 1}`,
+          surname: i === 0 ? "Vemuri" : "Reddy",
+          fatherOrSpouseName: "Venkatacharyulu",
+          dob: "1990-01-01",
+          age: 32 + i,
+          mobileNumber: `98480223${i < 10 ? '0' + i : i}`,
+          emailId: `volunteer${i+1}@example.com`,
+          bloodGroup: "A+",
+          gender: "Male",
+          mentallyFit: true,
+          physicallyFit: true,
+          street: "Temple Road",
+          doorNumber: `12-${i+1}`,
+          pincode: "517501",
+          country: "India",
+          state: "Andhra Pradesh",
+          district: "Chittoor",
+          city: "Tirupati",
+          nearestTemple: "Tirumala Balaji"
+        }))
+      );
+
+      const [selectedRenewalPlan, setSelectedRenewalPlan] = useState({ duration: "30 Days", price: 199 });
+      const [couponCode, setCouponCode] = useState("");
+      const [toasts, setToasts] = useState([]);
+
+      const addToast = (msg) => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, msg }]);
+        setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), 2500);
+      };
+
+      const updatePilgrimMember = (setName, index, updatedMember) => {
+        setPilgrimSets(pilgrimSets.map(s => {
+          if (s.name === setName) {
+            const newMembers = [...s.members];
+            newMembers[index] = updatedMember;
+            return { ...s, members: newMembers };
+          }
+          return s;
+        }));
+        addToast("Pilgrim updated successfully!");
+      };
+
+      const deletePilgrimMember = (setName, index) => {
+        setPilgrimSets(pilgrimSets.map(s => {
+          if (s.name === setName) {
+            return { ...s, members: s.members.filter((_, i) => i !== index) };
+          }
+          return s;
+        }));
+        addToast("Pilgrim deleted.");
+      };
+
+      const updateSrivaniMember = (index, updatedMember) => {
+        const newMembers = [...srivaniMembers];
+        newMembers[index] = updatedMember;
+        setSrivaniMembers(newMembers);
+        addToast("Srivani member updated!");
+      };
+
+      const deleteSrivaniMember = (index) => {
+        setSrivaniMembers(srivaniMembers.filter((_, i) => i !== index));
+        addToast("Srivani member deleted.");
+      };
+
+      const updateGroupMember = (index, updatedMember) => {
+        const newMembers = [...groupMembers];
+        newMembers[index] = updatedMember;
+        setGroupMembers(newMembers);
+        addToast("Group member updated!");
+      };
+
+      const deleteGroupMember = (index) => {
+        setGroupMembers(groupMembers.filter((_, i) => i !== index));
+        addToast("Group member deleted.");
+      };
+
+      const handleAddPilgrimToSet = (e) => {
+        e.preventDefault();
+        if (!newName.trim() || !newIdNum.trim()) {
+          addToast("Please fill Name and ID Proof Number");
+          return;
+        }
+
+        const existingSet = pilgrimSets.find(s => s.name === newSetNameInput);
+        if (existingSet && existingSet.members.length >= 6) {
+          addToast("Max 6 members allowed per set!");
+          return;
+        }
+
+        const newMember = {
+          name: newName,
+          age: parseInt(newAge) || 30,
+          gender: newGender,
+          idType: newIdType,
+          idNum: newIdNum,
+          email: addEmail,
+          city: addCity,
+          state: addState,
+          country: addCountry,
+          pincode: addPincode,
+          gothram: addGothram
+        };
+
+        if (existingSet) {
+          setPilgrimSets(pilgrimSets.map(s => s.name === newSetNameInput ? { ...s, members: [...s.members, newMember] } : s));
+        } else {
+          setPilgrimSets([...pilgrimSets, { id: Date.now().toString(), name: newSetNameInput, members: [newMember] }]);
+        }
+
+        addToast(`Successfully added ${newName} to set "${newSetNameInput}"`);
+        setNewName("");
+        setNewAge("");
+        setNewIdNum("");
+        setAddEmail("");
+        setAddCity("");
+        setAddState("");
+        setAddPincode("");
+        setAddGothram("");
+      };
+
+      const handleAddSrivaniPerson = (e) => {
+        e.preventDefault();
+        if (!srivaniNewName.trim() || !srivaniNewIdNum.trim()) {
+          addToast("Please fill Name and ID Proof Number");
+          return;
+        }
+        if (srivaniMembers.length >= 9) {
+          addToast("Maximum 9 people allowed for Srivani quota!");
+          return;
+        }
+        const newPerson = {
+          name: srivaniNewName,
+          age: parseInt(srivaniNewAge) || 30,
+          gender: srivaniNewGender,
+          idType: srivaniNewIdType,
+          idNum: srivaniNewIdNum
+        };
+        setSrivaniMembers([...srivaniMembers, newPerson]);
+        addToast(`Added ${srivaniNewName} to Srivani roster`);
+        setSrivaniNewName("");
+        setSrivaniNewAge("");
+        setSrivaniNewIdNum("");
+      };
+
+      const copyAddressToAllGroupMembers = () => {
+        const leader = groupMembers[0];
+        setGroupMembers(groupMembers.map(m => ({
+          ...m,
+          street: leader.street,
+          doorNumber: leader.doorNumber,
+          pincode: leader.pincode,
+          country: leader.country,
+          state: leader.state,
+          district: leader.district,
+          city: leader.city,
+          nearestTemple: leader.nearestTemple
+        })));
+        addToast("Copied Team Leader address to all 15 members!");
+      };
+
+      const activeSetData = pilgrimSets.find(s => s.name === selectedSetName) || pilgrimSets[0];
+      const currentGroupMember = groupMembers[selectedGroupMember - 1] || groupMembers[0];
+
+      return (
+        <div className="flex flex-col items-center w-full max-w-6xl mx-auto space-y-2">
+          
+          {/* Top Box / Header Container */}
+          <div style={{ width: viewMode === "popup" ? '520px' : '100%', maxWidth: '100%' }} className={`border rounded-2xl p-3 px-4 flex items-center justify-between shadow-md transition-all ${darkMode ? 'bg-slate-800 border-sky-800 text-[#FFFFFF]' : 'bg-[#0284C7] border-[#0284C7] text-[#FFFFFF]'}`}>
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🏛️</span>
+              <h1 className="font-black text-xs md:text-sm tracking-wide text-[#FFFFFF]">
+                TTD DARSHAN AUTOFILL ASSISTANT
+              </h1>
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => setShowDisclaimerModal(true)}
+                className={`px-2.5 py-1 rounded-xl text-[10px] font-extrabold border transition-all shadow-xs flex items-center gap-1 ${
+                  darkMode 
+                    ? 'bg-sky-900/60 hover:bg-sky-800 border-sky-700 text-sky-200' 
+                    : 'bg-[#FFFFFF]/10 hover:bg-[#FFFFFF]/20 border-[#FFFFFF]/30 text-[#FFFFFF]'
+                }`}
+                title="View Legal Disclaimer"
+              >
+                <span>⚠️ Disclaimer</span>
+              </button>
+
+              <button 
+                onClick={() => { setViewMode("dashboard"); setDashboardTab("demo"); }}
+                className={`px-2.5 py-1 rounded-xl text-xs font-extrabold border transition-all shadow-xs flex items-center gap-1 ${
+                  darkMode 
+                    ? 'bg-sky-900/60 hover:bg-sky-800 border-sky-700 text-sky-200' 
+                    : 'bg-[#FFFFFF]/10 hover:bg-[#FFFFFF]/20 border-[#FFFFFF]/30 text-[#FFFFFF]'
+                }`}
+                title="View Step-by-Step Demo Guide"
+              >
+                <span>📖 Demo</span>
+              </button>
+
+              <button 
+                onClick={() => {
+                  setDarkMode(!darkMode);
+                  addToast(darkMode ? "Switched to Light Mode" : "Switched to Dark Mode");
+                }}
+                className={`p-1.5 px-2.5 rounded-xl border text-xs font-bold transition-all shadow-xs ${
+                  darkMode 
+                    ? 'bg-sky-900/60 hover:bg-sky-800 border-sky-700 text-sky-200' 
+                    : 'bg-[#E0F2FE] hover:bg-[#F0F9FF] border-[#E5E7EB] text-[#0284C7]'
+                }`}
+                title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              >
+                {darkMode ? "☀️" : "🌙"}
+              </button>
+            </div>
+          </div>
+
+          {viewMode === "popup" ? (
+            <div 
+              style={{ width: '520px', maxWidth: '100%' }}
+              className={`border rounded-2xl shadow-xl overflow-hidden flex flex-col transition-all ${darkMode ? 'bg-slate-900 border-sky-800 text-slate-100' : 'bg-[#FFFFFF] border-[#E5E7EB] text-[#111827]'}`}
+            >
+              <div className={`border-b px-4 py-3 flex items-center justify-between gap-2 ${darkMode ? 'bg-slate-900 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                <div className="flex-1 flex items-center gap-2">
+                  <button 
+                    onClick={() => { setViewMode("dashboard"); setDashboardTab("dashboard"); }}
+                    className="flex-1 py-2 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl text-xs font-extrabold shadow-xs flex items-center justify-center gap-1.5 transition-all"
+                  >
+                    <span>🖥️ MASTER DASHBOARD</span>
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <button 
+                    onClick={() => { setViewMode("dashboard"); setDashboardTab("renewal"); }}
+                    className={`p-2 border rounded-xl text-xs font-bold shadow-xs ${darkMode ? 'bg-slate-800 hover:bg-slate-700 text-sky-200 border-sky-800' : 'bg-[#FFFFFF] hover:bg-[#F0F9FF] text-[#0369A1] border-[#E5E7EB]'}`}
+                    title="Settings"
+                  >
+                    ⚙️
+                  </button>
+                  <select 
+                    value={language}
+                    onChange={e => { setLanguage(e.target.value); addToast(`Language: ${e.target.value}`); }}
+                    className={`px-2 py-2 border rounded-xl text-xs font-bold ${darkMode ? 'bg-slate-800 border-sky-800 text-sky-200' : 'bg-[#FFFFFF] border-[#E5E7EB] text-[#0369A1]'}`}
+                  >
+                    <option value="EN">🌐 EN</option>
+                    <option value="TE">🌐 తె</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className={`p-2.5 border-b space-y-2 ${darkMode ? 'bg-slate-800/80 border-sky-800' : 'bg-[#F0F9FF] border-[#E5E7EB]'}`}>
+                <div className={`grid grid-cols-4 gap-1 p-1 rounded-xl border ${darkMode ? 'bg-slate-900 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                  {[
+                    { id: "booking", label: "👤 Pilgrim Booking" },
+                    { id: "srivani", label: "✨ Srivani" },
+                    { id: "seva", label: "🙏 Srivari Seva" },
+                    { id: "group", label: "👥 Seva Group" }
+                  ].map(tab => {
+                    const isActive = activeTab === tab.id;
+                    return (
+                      <button
+                        key={tab.id}
+                        onClick={() => setActiveTab(tab.id)}
+                        className={`py-2 text-[11px] font-extrabold rounded-lg transition-all text-center ${
+                          isActive 
+                            ? darkMode ? "bg-sky-900/70 text-sky-200 border border-sky-700 shadow-xs" : "bg-[#E0F2FE] text-[#0369A1] border border-[#E0F2FE] shadow-xs"
+                            : darkMode ? "text-slate-400 hover:text-white hover:bg-slate-800 border border-transparent" : "text-[#6B7280] hover:text-[#111827] hover:bg-[#F0F9FF] border border-transparent"
+                        }`}
+                      >
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <div className={`px-2 py-1.5 border rounded-lg flex items-center justify-between text-xs shadow-xs ${darkMode ? 'bg-slate-900 border-sky-800 text-slate-300' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                  <span className="font-semibold text-[#9CA3AF]">Portal:</span>
+                  {activeTab === "booking" && (
+                    <a href="https://ttdevasthanams.ap.gov.in" target="_blank" rel="noreferrer" className="font-extrabold text-[#0284C7] hover:underline flex items-center gap-1">
+                      <span>🏛️ Official Website ↗</span>
+                    </a>
+                  )}
+                  {activeTab === "srivani" && (
+                    <a href="https://ttdevasthanams.ap.gov.in" target="_blank" rel="noreferrer" className="font-extrabold text-[#0284C7] hover:underline flex items-center gap-1">
+                      <span>✨ Srivani Portal ↗</span>
+                    </a>
+                  )}
+                  {activeTab === "seva" && (
+                    <a href="https://ttdevasthanams.ap.gov.in" target="_blank" rel="noreferrer" className="font-extrabold text-[#16A34A] hover:underline flex items-center gap-1">
+                      <span>🙏 Srivari Seva Portal ↗</span>
+                    </a>
+                  )}
+                  {activeTab === "group" && (
+                    <a href="https://ttdevasthanams.ap.gov.in" target="_blank" rel="noreferrer" className="font-extrabold text-[#0284C7] hover:underline flex items-center gap-1">
+                      <span>👥 Seva Group Portal ↗</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              {activeTab === "booking" && (
+                <div className="p-4 space-y-3.5 text-xs">
+                  <div className={`p-3 border rounded-xl space-y-2.5 ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#F0F9FF] border-[#E5E7EB]'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`font-extrabold text-xs ${darkMode ? 'text-sky-300' : 'text-[#0369A1]'}`}>FILL CONTINUE DEFAULT</span>
+                      <div className={`flex gap-1 p-0.5 rounded-lg border ${darkMode ? 'bg-slate-900 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                        <button 
+                          onClick={() => setDefaultAction("fill")}
+                          className={`px-2.5 py-1 text-[10px] font-bold rounded ${defaultAction === "fill" ? "bg-[#0284C7] text-[#FFFFFF]" : darkMode ? "text-slate-400" : "text-[#6B7280]"}`}
+                        >
+                          ⚡ Fill
+                        </button>
+                        <button 
+                          onClick={() => setDefaultAction("fill_continue")}
+                          className={`px-2.5 py-1 text-[10px] font-bold rounded ${defaultAction === "fill_continue" ? "bg-[#0284C7] text-[#FFFFFF]" : darkMode ? "text-slate-400" : "text-[#6B7280]"}`}
+                        >
+                          ⚡ Fill & Continue
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between">
+                        <label className={`block font-bold text-xs ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Select Pilgrim Set</label>
+                        <span className="text-[10px] font-bold text-[#0284C7]">({activeSetData.members.length} / 6 members)</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <select 
+                          value={selectedSetName}
+                          onChange={e => setSelectedSetName(e.target.value)}
+                          className={`flex-1 p-2 border rounded-lg font-bold text-xs ${darkMode ? 'bg-slate-900 border-sky-800 text-sky-200' : 'bg-[#FFFFFF] border-[#E5E7EB] text-[#111827]'}`}
+                        >
+                          {pilgrimSets.map(s => (
+                            <option key={s.id} value={s.name}>{s.name} ({s.members.length} Members)</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className={`p-2.5 border rounded-xl space-y-1.5 ${darkMode ? 'bg-slate-900 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                      <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowSetDetails(!showSetDetails)}>
+                        <p className={`font-extrabold text-[11px] ${darkMode ? 'text-slate-100' : 'text-[#111827]'}`}>Selected Set: <span className="text-[#0284C7]">{activeSetData.name}</span></p>
+                        <button className="text-[#0284C7] font-bold text-xs">
+                          {showSetDetails ? "▲" : "▼"}
+                        </button>
+                      </div>
+                      {showSetDetails && (
+                        <div className={`pt-2 border-t max-h-64 overflow-y-auto pr-1 ${darkMode ? 'border-sky-900' : 'border-[#E5E7EB]'}`}>
+                          {activeSetData.members.length === 0 ? (
+                            <p className="text-[10px] text-[#9CA3AF]">No members in this set.</p>
+                          ) : (
+                            activeSetData.members.map((m, idx) => (
+                              <InlineMemberCard 
+                                key={idx} 
+                                member={m} 
+                                index={idx} 
+                                darkMode={darkMode}
+                                onUpdate={(updated) => updatePilgrimMember(activeSetData.name, idx, updated)} 
+                                onDelete={() => deletePilgrimMember(activeSetData.name, idx)} 
+                              />
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <button 
+                      onClick={() => addToast(`⚡ Executed Autofill for set "${activeSetData.name}"`)}
+                      className="w-full py-2.5 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl text-xs font-extrabold transition-all shadow-xs flex items-center justify-center gap-2"
+                    >
+                      <span>{defaultAction === "fill_continue" ? "⚡ Fill & Continue" : "⚡ Fill Details"}</span>
+                      <span className="text-[10px] bg-[#FFFFFF]/20 px-1.5 py-0.5 rounded text-[#FFFFFF] font-mono">Alt + S</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "srivani" && (
+                <div className="p-4 space-y-3.5 text-xs">
+                  <button 
+                    onClick={() => addToast("⚡ Fill Srivani Details executed (Alt + A)")}
+                    className="w-full py-2.5 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl text-xs font-extrabold shadow-md flex items-center justify-center gap-2 transition-all"
+                  >
+                    <span>⚡ Fill Srivani Details</span>
+                    <span className="text-[10px] bg-[#FFFFFF]/20 px-1.5 py-0.5 rounded text-[#FFFFFF] font-mono">Alt + A</span>
+                  </button>
+
+                  <div className={`p-2.5 border rounded-xl space-y-2 ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#F0F9FF] border-[#E5E7EB]'}`}>
+                    <label className={`block text-[10px] font-bold ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Select Srivani Set</label>
+                    <div className="flex gap-2">
+                      <select 
+                        value={srivaniPreset} 
+                        onChange={e => handleSrivaniPresetChange(e.target.value)}
+                        className={`flex-1 p-2 border rounded-lg font-bold text-xs ${darkMode ? 'bg-slate-900 border-sky-800 text-sky-200' : 'bg-[#FFFFFF] border-[#E5E7EB] text-[#111827]'}`}
+                      >
+                        <option value="family">Family Set ({srivaniMembers.length} Persons)</option>
+                        <option value="vip">VIP Donor Set (2 Persons)</option>
+                        <option value="solo">Individual Donor Set (1 Person)</option>
+                      </select>
+                    </div>
+
+                    <div className={`p-2 border rounded-lg space-y-1 mt-1 ${darkMode ? 'bg-slate-900 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                      <div className="flex items-center justify-between cursor-pointer" onClick={() => setShowSrivaniList(!showSrivaniList)}>
+                        <p className={`font-extrabold text-[10px] ${darkMode ? 'text-slate-200' : 'text-[#111827]'}`}>Srivani Active Roster ({srivaniMembers.length}/9):</p>
+                        <button className="text-[#0284C7] font-bold text-xs">
+                          {showSrivaniList ? "▲" : "▼"}
+                        </button>
+                      </div>
+                      {showSrivaniList && (
+                        <div className={`pt-2 border-t max-h-64 overflow-y-auto pr-1 ${darkMode ? 'border-sky-900' : 'border-[#E5E7EB]'}`}>
+                          {srivaniMembers.length === 0 ? (
+                            <p className="text-[10px] text-[#9CA3AF]">No members in roster.</p>
+                          ) : (
+                            srivaniMembers.map((m, idx) => (
+                              <InlineMemberCard 
+                                key={idx} 
+                                member={m} 
+                                index={idx} 
+                                isSrivani={true}
+                                darkMode={darkMode}
+                                onUpdate={(updated) => updateSrivaniMember(idx, updated)} 
+                                onDelete={() => deleteSrivaniMember(idx)} 
+                              />
+                            ))
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className={`p-3 border rounded-xl space-y-3 ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                    <span className="font-extrabold text-[10px] uppercase text-[#0284C7] tracking-wider block">Booking Type</span>
+
+                    <div className="flex items-center gap-2">
+                      <input type="checkbox" id="advBook" checked={advanceBooking} onChange={e => setAdvanceBooking(e.target.checked)} className="w-4 h-4 accent-[#0284C7] rounded" />
+                      <label htmlFor="advBook" className={`font-extrabold ${darkMode ? 'text-slate-200' : 'text-[#111827]'}`}>Advance Booking</label>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Break Darshan Date</label>
+                        <input type="date" value={breakDate} onChange={e => setBreakDate(e.target.value)} className={`w-full p-1.5 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-800 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                      </div>
+                      <div>
+                        <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Additional Laddus (1-999)</label>
+                        <input type="number" min="1" max="999" value={laddus} onChange={e => setLaddus(parseInt(e.target.value) || 1)} className={`w-full p-1.5 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-800 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                      </div>
+                    </div>
+
+                    <div className={`pt-2 border-t flex items-center gap-2 ${darkMode ? 'border-sky-900' : 'border-[#E5E7EB]'}`}>
+                      <input type="checkbox" id="includeAcc" checked={includeAcc} onChange={e => setIncludeAcc(e.target.checked)} className="w-4 h-4 accent-[#0284C7] rounded" />
+                      <label htmlFor="includeAcc" className={`font-extrabold ${darkMode ? 'text-slate-200' : 'text-[#111827]'}`}>Include Accommodation Request</label>
+                    </div>
+
+                    {includeAcc && (
+                      <div className="grid grid-cols-2 gap-2 pt-1">
+                        <div>
+                          <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Accommodation Date</label>
+                          <input type="date" value={accDate} onChange={e => setAccDate(e.target.value)} className={`w-full p-1.5 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-800 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                        </div>
+                        <div>
+                          <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Check-in Slot</label>
+                          <select value={timeSlot} onChange={e => setTimeSlot(e.target.value)} className={`w-full p-1.5 border rounded-lg text-[11px] ${darkMode ? 'bg-slate-900 border-sky-800 text-[#FFFFFF]' : 'bg-[#FFFFFF]'}`}>
+                            <option>00:00 Hrs to 05:59 Hrs</option>
+                            <option>06:00 Hrs to 11:59 Hrs</option>
+                            <option>12:00 Hrs to 17:59 Hrs</option>
+                            <option>18:00 Hrs to 23:59 Hrs</option>
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "seva" && (
+                <div className="p-4 space-y-3.5 text-xs">
+                  <div className={`p-3 border rounded-xl space-y-2.5 ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#F0F9FF] border-[#E5E7EB]'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className={`font-extrabold text-[11px] ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>Primary Volunteer Profile</span>
+                      <button onClick={() => { setViewMode("dashboard"); setDashboardTab("srivari_seva"); }} className="px-3 py-1 bg-[#0284C7] text-[#FFFFFF] rounded-lg font-bold hover:bg-[#0369A1]">
+                        ⚡ Fill Seva Form
+                      </button>
+                    </div>
+                    <div className={`space-y-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>
+                      <p className={`font-extrabold ${darkMode ? 'text-[#FFFFFF]' : 'text-[#111827]'}`}>{sevaData.name} ({sevaData.age} yrs • {sevaData.gender})</p>
+                      <p className="font-medium">ID: {sevaData.idType} • {sevaData.idNumber}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "group" && (
+                <div className="p-4 space-y-3.5 text-xs">
+                  <div className={`flex items-center justify-between pb-2 border-b ${darkMode ? 'border-sky-900' : 'border-[#E5E7EB]'}`}>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[#0284C7]">Fill Member #</span>
+                      <input 
+                        type="number" 
+                        min="1" 
+                        max="15" 
+                        value={selectedGroupMember} 
+                        onChange={e => setSelectedGroupMember(parseInt(e.target.value) || 1)}
+                        className={`w-12 p-1 border rounded-lg text-center font-bold ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} 
+                      />
+                      <button 
+                        onClick={() => addToast(`⚡ Autofilled Seva Group Member #${selectedGroupMember}`)}
+                        className="px-3 py-1 bg-[#0284C7] text-[#FFFFFF] rounded-lg font-bold hover:bg-[#0369A1]"
+                      >
+                        ⚡ Fill
+                      </button>
+                    </div>
+                    <button 
+                      onClick={copyAddressToAllGroupMembers}
+                      className="text-[10px] font-bold text-[#0284C7] hover:underline"
+                    >
+                      Copy Address to All
+                    </button>
+                  </div>
+
+                  <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+                    {groupMembers.map((m, idx) => (
+                      <InlineGroupCard 
+                        key={m.id} 
+                        member={m} 
+                        index={idx} 
+                        darkMode={darkMode}
+                        onUpdate={(updated) => updateGroupMember(idx, updated)} 
+                        onDelete={() => deleteGroupMember(idx)} 
+                      />
+                    ))}
+                  </div>
+
+                  <button 
+                    onClick={() => { setViewMode("dashboard"); setDashboardTab("seva_group"); }}
+                    className="w-full py-2 bg-[#0284C7] text-[#FFFFFF] rounded-xl font-bold"
+                  >
+                    Open Full Group Dashboard Manager
+                  </button>
+                </div>
+              )}
+
+              <div className={`px-4 py-2.5 border-t flex items-center justify-between text-xs ${darkMode ? 'bg-slate-900 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#16A34A] animate-pulse"></span>
+                  <span className={`font-bold ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Pass: <strong className="text-[#0284C7]">Active (1d 20h)</strong></span>
+                </div>
+                <button onClick={() => { setViewMode("dashboard"); setDashboardTab("renewal"); }} className="text-[10px] font-bold px-2.5 py-1 rounded-lg bg-[#DC2626] text-[#FFFFFF] hover:bg-[#B91C1C] transition-colors shadow-xs">
+                  Renew Pass
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className={`w-full max-w-7xl min-h-[780px] border rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row text-xs transition-all ${darkMode ? 'bg-slate-900 border-sky-800 text-slate-100' : 'bg-[#FFFFFF] border-[#E5E7EB] text-[#111827]'}`}>
+              
+              <div className={`w-full md:w-72 border-r p-5 flex flex-col justify-between space-y-4 ${darkMode ? 'bg-slate-800/60 border-sky-800' : 'bg-[#F0F9FF] border-[#E5E7EB]'}`}>
+                <div className="space-y-4">
+                  <div className={`pb-3 border-b ${darkMode ? 'border-sky-800' : 'border-[#E5E7EB]'}`}>
+                    <h2 className={`text-sm font-extrabold ${darkMode ? 'text-[#FFFFFF]' : 'text-[#111827]'}`}>MASTER DASHBOARD</h2>
+                  </div>
+
+                  <nav className="space-y-1">
+                    {[
+                      { id: "dashboard", label: "Dashboard" },
+                      { id: "add_view_pilgrim", label: "Add & View Pilgrim" },
+                      { id: "srivani_details", label: "Srivani Details" },
+                      { id: "srivari_seva", label: "Srivari Seva Form" },
+                      { id: "seva_group", label: "Seva Group" },
+                      { id: "renewal", label: "Renewal Pricing & Plans" },
+                      { id: "backup", label: "Backup & Restore" },
+                      { id: "demo", label: "How to Book Demo" },
+                      { id: "legal_support", label: "Legal & Support" }
+                    ].map(item => {
+                      const isActive = dashboardTab === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setDashboardTab(item.id)}
+                          className={`w-full text-left px-3 py-2.5 rounded-xl font-bold transition-all ${
+                            isActive 
+                              ? "bg-[#0284C7] text-[#FFFFFF] shadow-sm" 
+                              : darkMode ? "text-slate-300 hover:bg-slate-800 hover:text-[#FFFFFF]" : "text-[#6B7280] hover:bg-[#FFFFFF] hover:text-[#0284C7]"
+                          }`}
+                        >
+                          {item.label}
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
+
+                <div className={`p-3.5 border rounded-xl space-y-2 ${darkMode ? 'bg-slate-900 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                  <div className="flex items-center justify-between">
+                    <span className={`font-bold ${darkMode ? 'text-[#FFFFFF]' : 'text-[#111827]'}`}>Pass Status</span>
+                    <span className="text-[10px] font-bold text-[#16A34A] bg-[#16A34A]/10 px-2 py-0.5 rounded-full border border-[#16A34A]/30">Active</span>
+                  </div>
+                  <p className="text-[10px] text-[#9CA3AF]">Pass • 1d 20h remaining</p>
+                  <button onClick={() => { setDashboardTab("renewal"); }} className="w-full py-1.5 bg-[#DC2626] hover:bg-[#B91C1C] text-[#FFFFFF] rounded-lg font-bold shadow-sm">
+                    Renew Pass
+                  </button>
+                </div>
+
+                <button onClick={() => setViewMode("popup")} className="w-full py-2 bg-[#111827] hover:bg-black text-[#FFFFFF] rounded-xl font-bold">
+                  ← Back to Extension Popup
+                </button>
+              </div>
+
+              <div className={`flex-1 p-8 space-y-6 max-h-[780px] overflow-y-auto ${darkMode ? 'bg-slate-900' : 'bg-[#FFFFFF]'}`}>
+                
+                {dashboardTab === "dashboard" && (
+                  <div className="space-y-6">
+                    <div className="p-5 rounded-2xl bg-[#0284C7] text-[#FFFFFF] shadow-md space-y-1">
+                      <h2 className="text-lg font-black tracking-wide">Welcome back 🙏</h2>
+                      <p className="text-xs text-[#E0F2FE]">Prepare calmly, before booking opens.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className={`md:col-span-3 p-5 border rounded-2xl space-y-3 shadow-sm ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                        <div className="flex items-center justify-between">
+                          <span className={`font-black text-sm ${darkMode ? 'text-white' : 'text-[#111827]'}`}>50<span className="text-xs text-[#9CA3AF]">/100</span></span>
+                          <span className="text-xs font-bold text-[#0284C7]">Booking readiness</span>
+                        </div>
+                        <div className="w-full bg-[#E5E7EB] h-2.5 rounded-full overflow-hidden">
+                          <div className="bg-[#0284C7] h-full w-1/2 rounded-full"></div>
+                        </div>
+                        <div className="space-y-1.5 text-xs pt-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[#6B7280] flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#16A34A]"></span> Saved pilgrims have mobile + address</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[#6B7280] flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-amber-500"></span> Ready on a supported TTD page</span>
+                          </div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[#6B7280] flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-[#16A34A]"></span> A backup exists</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className={`p-4 border rounded-2xl space-y-2 ${darkMode ? 'bg-sky-950/30 border-sky-800 text-slate-300' : 'bg-[#F0F9FF] border-[#BAE6FD] text-[#111827]'}`}>
+                      <div className="flex items-center gap-2 font-bold text-xs">
+                        <span>🔒</span>
+                        <span>Private booking data, transparent pass checks</span>
+                      </div>
+                      <p className="text-[11px] text-[#6B7280] leading-relaxed">
+                        Pilgrim details stay on this browser. Pass activation contacts our licence service; there are no ads or behavioural trackers.<br/>
+                        • Served locally. This page loads from the extension itself — not from any website or server.<br/>
+                        • Your pilgrims, sets and preferences are saved only in this browser's local storage.<br/>
+                        • Your data is never uploaded or shared — not with the creator, not with anyone.
+                      </p>
+                    </div>
+
+                    {/* Integrated Trust Center Elements */}
+                    <div className="space-y-4 pt-4 border-t border-[#E5E7EB]">
+                      <SectionWrapper darkMode={darkMode} title="Why each permission is needed" defaultOpen={false}>
+                        <ul className="space-y-2 text-xs text-[#6B7280]">
+                          <li><strong className="text-[#0284C7] font-mono">storage:</strong> To save your pilgrims, sets and preferences on this browser so you don't re-type them.</li>
+                          <li><strong className="text-[#0284C7] font-mono">activeTab:</strong> To fill the form on the active tab you're looking at — only when you click autofill, and only on the official website.</li>
+                        </ul>
+                      </SectionWrapper>
+
+                      <SectionWrapper darkMode={darkMode} title="A note from the creator" defaultOpen={false}>
+                        <p className="text-xs text-[#6B7280] leading-relaxed">
+                          This is built by one developer, on nights and weekends, to spare fellow devotees the booking-time rush. It is an independent tool designed to keep you in control of every booking step.<br/>
+                          <button onClick={() => setDashboardTab("legal_support")} className="text-[#0284C7] font-bold hover:underline mt-1 inline-block">Read Privacy policy →</button> Independent tool, not affiliated. Never share your OTP or password with anyone.
+                        </p>
+                      </SectionWrapper>
+
+                      <div className="p-4 border border-[#DC2626]/30 bg-[#DC2626]/5 rounded-2xl space-y-2">
+                        <h4 className="font-extrabold text-xs text-[#DC2626]">Delete saved profiles and preferences</h4>
+                        <p className="text-[11px] text-[#6B7280] leading-relaxed">
+                          Permanently removes every pilgrim, set, booking draft, preference and legacy backup from this browser. Your active pass stays connected to this browser so its one-device activation is not stranded. Use "Move pass" in the extension popup to release it first. This deletion cannot be undone.
+                        </p>
+                        <div className="flex gap-2 pt-1">
+                          <input type="text" placeholder="Type DELETE to confirm" className="p-1.5 border rounded-lg text-xs bg-[#FFFFFF] border-[#E5E7EB] text-[#111827]" />
+                          <button onClick={() => addToast("Delete action simulated.")} className="px-3.5 py-2 bg-[#DC2626] hover:bg-[#B91C1C] text-[#FFFFFF] rounded-lg text-xs font-bold shadow-sm">Delete saved data</button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === "add_view_pilgrim" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Add & View Pilgrim Roster</h3>
+                      <span className="text-xs font-bold text-[#0284C7]">Set: {selectedSetName} ({activeSetData.members.length} / 6 members)</span>
+                    </div>
+
+                    <form onSubmit={handleAddPilgrimToSet} className="space-y-3">
+                      <SectionWrapper 
+                        darkMode={darkMode}
+                        defaultOpen={true}
+                        containerClass={darkMode ? "bg-slate-800 border-sky-800 shadow-sm" : "bg-[#F0F9FF] border-[#E5E7EB] shadow-sm"}
+                        title={
+                          <div className="flex items-center justify-between">
+                            <span className="font-extrabold text-xs text-[#0284C7] uppercase tracking-wide">Add New Pilgrim to Set</span>
+                            <span className="text-[11px] font-semibold text-[#9CA3AF] normal-case pr-2">Max 6 members per set</span>
+                          </div>
+                        }
+                      >
+                        <div className="grid grid-cols-2 gap-2.5">
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Set Name *</label>
+                            <input type="text" value={newSetNameInput} onChange={e => setNewSetNameInput(e.target.value)} placeholder="e.g. Family Pack" className={`w-full p-2 border rounded-lg text-xs font-bold ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} required />
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Name *</label>
+                            <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Full Name as per ID" className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} required />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Age *</label>
+                            <input type="number" value={newAge} onChange={e => setNewAge(e.target.value)} placeholder="35" className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} required />
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Gender *</label>
+                            <select value={newGender} onChange={e => setNewGender(e.target.value)} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                              <option>Male</option>
+                              <option>Female</option>
+                              <option>Transgender</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Type *</label>
+                            <select value={newIdType} onChange={e => setNewIdType(e.target.value)} className={`w-full p-2 border rounded-lg text-xs font-bold text-[#0284C7] ${darkMode ? 'bg-slate-900 border-sky-700' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                              <option value="Aadhaar Card">Aadhaar Card</option>
+                              <option value="Passport">Passport</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className={`block text-[10px] font-bold mb-0.5 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Number *</label>
+                          <input type="text" value={newIdNum} onChange={e => setNewIdNum(e.target.value)} placeholder="12-digit Aadhaar / Passport number" className={`w-full p-2 border rounded-lg text-xs font-mono ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} required />
+                        </div>
+
+                        <SectionWrapper darkMode={darkMode} title="Additional Details (Optional)" defaultOpen={false}>
+                          <div className="grid grid-cols-2 gap-2">
+                            <input type="email" placeholder="Email" value={addEmail} onChange={e => setAddEmail(e.target.value)} className={`p-1.5 border rounded-lg ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                            <input type="text" placeholder="City" value={addCity} onChange={e => setAddCity(e.target.value)} className={`p-1.5 border rounded-lg ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            <input type="text" placeholder="State" value={addState} onChange={e => setAddState(e.target.value)} className={`p-1.5 border rounded-lg ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                            <input type="text" placeholder="Country" value={addCountry} onChange={e => setAddCountry(e.target.value)} className={`p-1.5 border rounded-lg ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                            <input type="text" placeholder="Pincode" value={addPincode} onChange={e => setAddPincode(e.target.value)} className={`p-1.5 border rounded-lg ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                          </div>
+                          <div>
+                            <input type="text" placeholder="Gothram (Optional)" value={addGothram} onChange={e => setAddGothram(e.target.value)} className={`w-full p-1.5 border rounded-lg ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'border-[#E5E7EB]'}`} />
+                            <p className="text-[10px] text-amber-500 italic mt-0.5">Only needed for Divyanugraha Homam</p>
+                          </div>
+                        </SectionWrapper>
+
+                        <button type="submit" className="w-full py-2.5 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl font-bold shadow-sm transition-all">
+                          Add Pilgrim
+                        </button>
+                      </SectionWrapper>
+                    </form>
+
+                    <div className="space-y-3 pt-2">
+                      <h4 className={`font-extrabold text-sm ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>View Set Details & Mandatory Parameters</h4>
+                      {pilgrimSets.map(s => (
+                        <SectionWrapper 
+                          key={s.id}
+                          darkMode={darkMode}
+                          defaultOpen={false}
+                          title={
+                            <div className="flex items-center justify-between w-full pr-2">
+                              <span className={`font-bold ${darkMode ? 'text-[#FFFFFF]' : 'text-[#111827]'}`}>{s.name} ({s.members.length} Members)</span>
+                              <button onClick={(e) => { e.stopPropagation(); setSelectedSetName(s.name); setViewMode("popup"); }} className="px-3 py-1 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-lg text-[10px] font-bold shadow-sm transition-colors">
+                                Select in Popup
+                              </button>
+                            </div>
+                          }
+                        >
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            {s.members.map((m, idx) => (
+                              <InlineMemberCard 
+                                key={idx} 
+                                member={m} 
+                                index={idx} 
+                                darkMode={darkMode}
+                                onUpdate={(updated) => updatePilgrimMember(s.name, idx, updated)} 
+                                onDelete={() => deletePilgrimMember(s.name, idx)} 
+                              />
+                            ))}
+                          </div>
+                        </SectionWrapper>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === "srivani_details" && (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Srivani Details & Quota Management</h3>
+                      <span className="text-xs font-bold text-[#0284C7] bg-[#E0F2FE] px-3 py-1 rounded-full border border-[#BAE6FD] shadow-sm">
+                        Total Members: {srivaniMembers.length} / 9
+                      </span>
+                    </div>
+
+                    <SectionWrapper 
+                      title="📥 Import from Saved Pilgrim Sets"
+                      darkMode={darkMode}
+                      defaultOpen={false}
+                      containerClass={darkMode ? "bg-slate-800 border-sky-800" : "bg-[#F0F9FF] border-[#E5E7EB]"}
+                      titleClass={darkMode ? "text-sky-300" : "text-[#0284C7]"}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                        {pilgrimSets.flatMap(s => s.members).map((p, idx) => (
+                          <div key={idx} className={`p-2.5 border rounded-xl flex items-center justify-between shadow-sm ${darkMode ? 'bg-slate-900 border-sky-900' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                            <div>
+                              <p className={`font-bold text-[11px] ${darkMode ? 'text-[#FFFFFF]' : 'text-[#111827]'}`}>{p.name}</p>
+                              <p className="text-[10px] text-[#9CA3AF]">{p.age}y • {p.gender} • {p.idType}</p>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                if (srivaniMembers.length >= 9) {
+                                  addToast("Srivani quota is full (Max 9 people)");
+                                  return;
+                                }
+                                if (srivaniMembers.some(m => m.idNum === p.idNum)) {
+                                  addToast(`${p.name} is already in the Srivani list`);
+                                  return;
+                                }
+                                setSrivaniMembers([...srivaniMembers, { name: p.name, age: p.age, gender: p.gender, idType: p.idType, idNum: p.idNum }]);
+                                addToast(`Imported ${p.name} into Srivani list`);
+                              }}
+                              className="px-2.5 py-1 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-lg text-[10px] font-bold shadow-sm transition-colors"
+                            >
+                              + Add
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </SectionWrapper>
+
+                    <form onSubmit={handleAddSrivaniPerson}>
+                      <SectionWrapper darkMode={darkMode} title="Add Person" defaultOpen={true} containerClass={darkMode ? "bg-slate-800 border-sky-800" : "bg-[#F0F9FF] border-[#E5E7EB]"}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Name (as per ID) *</label>
+                            <input type="text" value={srivaniNewName} onChange={e => setSrivaniNewName(e.target.value)} placeholder="Enter Name" className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} required />
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Age *</label>
+                            <input type="number" value={srivaniNewAge} onChange={e => setSrivaniNewAge(e.target.value)} placeholder="Age" className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} required />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Gender *</label>
+                            <select value={srivaniNewGender} onChange={e => setSrivaniNewGender(e.target.value)} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                              <option>Male</option>
+                              <option>Female</option>
+                              <option>Transgender</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Type *</label>
+                            <select value={srivaniNewIdType} onChange={e => setSrivaniNewIdType(e.target.value)} className={`w-full p-2 border rounded-lg text-xs font-bold text-[#0284C7] ${darkMode ? 'bg-slate-900 border-sky-700' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                              <option value="Aadhaar Card">Aadhaar Card</option>
+                              <option value="Passport">Passport</option>
+                            </select>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Number *</label>
+                          <input type="text" value={srivaniNewIdNum} onChange={e => setSrivaniNewIdNum(e.target.value)} placeholder="Aadhaar / Passport Number" className={`w-full p-2 border rounded-lg text-xs font-mono ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} required />
+                        </div>
+
+                        <button type="submit" className="w-full py-2.5 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl font-bold shadow-sm transition-all">
+                          Add Person
+                        </button>
+                      </SectionWrapper>
+                    </form>
+
+                    <div className="pt-2">
+                      <SectionWrapper darkMode={darkMode} title={`Current Srivani Roster (${srivaniMembers.length} / 9)`}>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                          {srivaniMembers.map((m, idx) => (
+                            <InlineMemberCard 
+                              key={idx} 
+                              member={m} 
+                              index={idx} 
+                              isSrivani={true}
+                              darkMode={darkMode}
+                              onUpdate={(updated) => updateSrivaniMember(idx, updated)} 
+                              onDelete={() => deleteSrivaniMember(idx)} 
+                            />
+                          ))}
+                        </div>
+                      </SectionWrapper>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === "srivari_seva" && (
+                  <div className="space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Srivari Seva Form</h3>
+                        <p className="text-xs text-[#6B7280]">Manage your volunteer record and fill Dev Seva portal forms.</p>
+                      </div>
+                    </div>
+
+                    {!isEditingSeva ? (
+                      <div className={`p-6 border rounded-2xl space-y-4 shadow-sm relative ${darkMode ? 'bg-slate-800 border-green-600 text-slate-100' : 'bg-[#FFFFFF] border-[#16A34A] text-[#111827]'}`}>
+                        <div className="flex justify-end pb-1">
+                          <button onClick={() => setIsEditingSeva(true)} className="px-4 py-1.5 bg-[#111827] text-[#FFFFFF] rounded-lg text-xs font-bold hover:bg-black">Update Form</button>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-4 gap-x-2 text-xs">
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">Identity Proof:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.idType} ({sevaData.idNumber})</strong></div>
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">Mobile Number:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.mobileNumber}</strong></div>
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">Full Name:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.name}</strong></div>
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">Father/Spouse:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.fatherOrSpouseName}</strong></div>
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">DOB & Age:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.dob} ({sevaData.age}y)</strong></div>
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">Gender & Blood:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.gender}, {sevaData.bloodGroup}</strong></div>
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">Fitness:</span> <strong className="text-[#16A34A]">Mentally & Physically Fit</strong></div>
+                          <div><span className="text-[#6B7280] block text-[10px] font-bold">Qualification:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.qualification} ({sevaData.profession})</strong></div>
+                          <div className="col-span-1 sm:col-span-3"><span className="text-[#6B7280] block text-[10px] font-bold">Address:</span> <strong className={darkMode ? 'text-white' : 'text-[#111827]'}>{sevaData.doorNumber}, {sevaData.street}, {sevaData.city} - {sevaData.pincode}</strong></div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className={`p-5 border rounded-2xl space-y-4 ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#F0F9FF] border-[#E5E7EB]'}`}>
+                        <div className="flex justify-between items-center pb-2 border-b">
+                          <span className="font-extrabold text-xs text-[#0284C7]">EDITING VOLUNTEER RECORD</span>
+                          <button onClick={() => { setIsEditingSeva(false); addToast("Srivari Seva Form updated successfully!"); }} className="px-4 py-2 bg-[#111827] text-[#FFFFFF] rounded-xl font-bold text-xs shadow-sm hover:bg-black">
+                            Update Form
+                          </button>
+                        </div>
+                        <SectionWrapper darkMode={darkMode} title="Identity Proof" defaultOpen={true}>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Type *</label>
+                              <select value={sevaData.idType} onChange={e => setSevaData({...sevaData, idType: e.target.value})} className={`w-full p-2 border rounded-lg text-xs font-bold text-[#0284C7] ${darkMode ? 'bg-slate-900 border-sky-700' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                                <option value="Aadhaar Card">Aadhaar Card</option>
+                                <option value="Passport">Passport</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Number *</label>
+                              <input type="text" value={sevaData.idNumber} onChange={e => setSevaData({...sevaData, idNumber: e.target.value})} placeholder="ID Number" className={`w-full p-2 border rounded-lg text-xs font-mono ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Mobile Number *</label>
+                              <input type="tel" value={sevaData.mobileNumber} onChange={e => setSevaData({...sevaData, mobileNumber: e.target.value})} placeholder="Mobile Number" className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                          </div>
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Sevak Recent Photo (Max 1MB, JPG/PNG) *</label>
+                            <input type="file" accept="image/jpeg,image/png" className="w-full text-xs text-[#9CA3AF] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#0284C7] file:text-[#FFFFFF] cursor-pointer hover:file:bg-[#0369A1] transition-all" />
+                          </div>
+                        </SectionWrapper>
+
+                        <SectionWrapper darkMode={darkMode} title="Basic Details" defaultOpen={true}>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Name *</label>
+                              <input type="text" value={sevaData.name} onChange={e => setSevaData({...sevaData, name: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Father/Spouse Name</label>
+                              <input type="text" value={sevaData.fatherOrSpouseName} onChange={e => setSevaData({...sevaData, fatherOrSpouseName: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Date of Birth *</label>
+                              <input type="date" value={sevaData.dob} onChange={e => setSevaData({...sevaData, dob: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Age *</label>
+                              <input type="number" value={sevaData.age} onChange={e => setSevaData({...sevaData, age: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Email Id</label>
+                              <input type="email" value={sevaData.emailId} onChange={e => setSevaData({...sevaData, emailId: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Blood Group</label>
+                              <select value={sevaData.bloodGroup} onChange={e => setSevaData({...sevaData, bloodGroup: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                                <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                                <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Gender *</label>
+                              <div className="flex items-center gap-4 pt-1">
+                                <label className="flex items-center gap-1.5 text-xs cursor-pointer"><input type="radio" name="gender" checked={sevaData.gender === "Male"} onChange={() => setSevaData({...sevaData, gender: "Male"})} className="accent-[#0284C7] cursor-pointer" /> Male</label>
+                                <label className="flex items-center gap-1.5 text-xs cursor-pointer"><input type="radio" name="gender" checked={sevaData.gender === "Female"} onChange={() => setSevaData({...sevaData, gender: "Female"})} className="accent-[#0284C7] cursor-pointer" /> Female</label>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Fitness *</label>
+                            <div className="flex items-center gap-6">
+                              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer"><input type="checkbox" checked={sevaData.mentallyFit} onChange={e => setSevaData({...sevaData, mentallyFit: e.target.checked})} className="accent-[#0284C7] w-3.5 h-3.5 cursor-pointer" /> Mentally Fit</label>
+                              <label className="flex items-center gap-2 text-xs font-semibold cursor-pointer"><input type="checkbox" checked={sevaData.physicallyFit} onChange={e => setSevaData({...sevaData, physicallyFit: e.target.checked})} className="accent-[#0284C7] w-3.5 h-3.5 cursor-pointer" /> Physically Fit</label>
+                            </div>
+                          </div>
+                        </SectionWrapper>
+
+                        <SectionWrapper darkMode={darkMode} title="Profession & Education Details" defaultOpen={true}>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Qualification</label>
+                              <input type="text" value={sevaData.qualification} onChange={e => setSevaData({...sevaData, qualification: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Profession</label>
+                              <input type="text" value={sevaData.profession} onChange={e => setSevaData({...sevaData, profession: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Area Of Interest</label>
+                              <input type="text" value={sevaData.areaOfInterest} onChange={e => setSevaData({...sevaData, areaOfInterest: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Employee Id</label>
+                              <input type="text" value={sevaData.employeeId} onChange={e => setSevaData({...sevaData, employeeId: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Designation / Retired as</label>
+                              <input type="text" value={sevaData.designation} onChange={e => setSevaData({...sevaData, designation: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Specialisation / Skill</label>
+                              <input type="text" value={sevaData.specialisation} onChange={e => setSevaData({...sevaData, specialisation: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Place Of Working / Retired</label>
+                              <input type="text" value={sevaData.placeOfWorking} onChange={e => setSevaData({...sevaData, placeOfWorking: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Upload Document (Max 1MB, JPG/PNG only)</label>
+                              <input type="file" accept="image/jpeg,image/png" className="w-full text-xs text-[#9CA3AF] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-[#0284C7] file:text-[#FFFFFF] cursor-pointer hover:file:bg-[#0369A1] transition-all" />
+                            </div>
+                          </div>
+                        </SectionWrapper>
+
+                        <SectionWrapper darkMode={darkMode} title="Address Details" defaultOpen={true}>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Country *</label>
+                              <input type="text" value={sevaData.country} onChange={e => setSevaData({...sevaData, country: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Pincode *</label>
+                              <input type="text" value={sevaData.pincode} onChange={e => setSevaData({...sevaData, pincode: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>State *</label>
+                              <input type="text" value={sevaData.state} onChange={e => setSevaData({...sevaData, state: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>District *</label>
+                              <input type="text" value={sevaData.district} onChange={e => setSevaData({...sevaData, district: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Mandal (Optional)</label>
+                              <input type="text" value={sevaData.mandal} onChange={e => setSevaData({...sevaData, mandal: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>City *</label>
+                              <input type="text" value={sevaData.city} onChange={e => setSevaData({...sevaData, city: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Street *</label>
+                              <input type="text" value={sevaData.street} onChange={e => setSevaData({...sevaData, street: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Door Number *</label>
+                              <input type="text" value={sevaData.doorNumber} onChange={e => setSevaData({...sevaData, doorNumber: e.target.value})} className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} />
+                            </div>
+                          </div>
+                        </SectionWrapper>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {dashboardTab === "seva_group" && (
+                  <div className="space-y-5">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Seva Group Roster (15 Members)</h3>
+                        <p className="text-xs text-[#6B7280]">Configure team leader and all 15 members with shared address syncing.</p>
+                      </div>
+                      <button 
+                        onClick={copyAddressToAllGroupMembers}
+                        className="px-4 py-2 bg-[#0284C7] text-[#FFFFFF] rounded-xl font-bold text-xs shadow-sm hover:bg-[#0369A1]"
+                      >
+                        📋 Copy Leader Address to All 15 Members
+                      </button>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row gap-4">
+                      <div className="w-full md:w-64 space-y-2 max-h-[600px] overflow-y-auto pr-2">
+                        {groupMembers.map(m => (
+                          <div 
+                            key={m.id}
+                            onClick={() => setSelectedGroupMember(m.id)}
+                            className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                              selectedGroupMember === m.id 
+                                ? darkMode ? 'border-sky-600 bg-sky-950/60 shadow-sm' : 'border-[#0284C7] bg-[#E0F2FE] shadow-sm' 
+                                : darkMode ? 'border-sky-900/60 bg-slate-800 hover:bg-slate-700' : 'border-[#E5E7EB] bg-[#FFFFFF] hover:bg-[#F0F9FF]'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className={`font-bold ${darkMode ? 'text-sky-300' : 'text-[#0369A1]'}`}>#{m.id} {m.name}</span>
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${darkMode ? 'bg-slate-700 text-slate-300' : 'bg-[#E5E7EB] text-[#6B7280]'}`}>{m.id === 1 ? "Leader" : "Member"}</span>
+                            </div>
+                            <p className="text-[10px] text-[#9CA3AF] mt-0.5 font-mono">ID: {m.idNumber}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className={`flex-1 p-5 border rounded-2xl space-y-4 ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                        <div className={`flex items-center justify-between border-b pb-3 ${darkMode ? 'border-sky-900' : 'border-[#E5E7EB]'}`}>
+                          <h4 className={`font-extrabold text-sm ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>
+                            #{currentGroupMember.id} {currentGroupMember.id === 1 ? "Team Leader" : "Team Member"} Configuration
+                          </h4>
+                          <button 
+                            onClick={() => addToast(`⚡ Autofilled Seva Group Member #${currentGroupMember.id} (${currentGroupMember.name})`)}
+                            className="px-3.5 py-1.5 bg-[#0284C7] text-[#FFFFFF] rounded-lg font-bold text-xs shadow-sm hover:bg-[#0369A1]"
+                          >
+                            ⚡ Fill This Member
+                          </button>
+                        </div>
+
+                        <div className={`p-4 border rounded-xl space-y-3 ${darkMode ? 'bg-slate-900 border-sky-900' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                          <h5 className={`font-extrabold text-xs uppercase tracking-wide ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>Identity Proof</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Type *</label>
+                              <select 
+                                value={currentGroupMember.idType} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, idType: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs font-bold text-[#0284C7] ${darkMode ? 'bg-slate-800 border-sky-700' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}
+                              >
+                                <option value="Aadhaar Card">Aadhaar Card</option>
+                                <option value="Passport">Passport</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>ID Proof Number *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.idNumber} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, idNumber: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs font-mono ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={`p-4 border rounded-xl space-y-3 ${darkMode ? 'bg-slate-900 border-sky-900' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                          <h5 className={`font-extrabold text-xs uppercase tracking-wide ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>Basic Details</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Name *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.name} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, name: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Surname</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.surname} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, surname: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Father/Spouse Name *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.fatherOrSpouseName} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, fatherOrSpouseName: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Date of Birth *</label>
+                              <input 
+                                type="date" 
+                                value={currentGroupMember.dob} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, dob: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Age *</label>
+                              <input 
+                                type="number" 
+                                value={currentGroupMember.age} 
+                                onChange={e => {
+                                  const val = parseInt(e.target.value) || 25;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, age: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Mobile Number *</label>
+                              <input 
+                                type="tel" 
+                                value={currentGroupMember.mobileNumber} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, mobileNumber: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className={`p-4 border rounded-xl space-y-3 ${darkMode ? 'bg-slate-900 border-sky-900' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                          <h5 className={`font-extrabold text-xs uppercase tracking-wide ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>Address Details</h5>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Street *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.street} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, street: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Door No *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.doorNumber} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, doorNumber: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Pincode *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.pincode} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, pincode: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Country *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.country} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, country: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>State *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.state} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, state: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>District *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.district} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, district: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>City *</label>
+                              <input 
+                                type="text" 
+                                value={currentGroupMember.city} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, city: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`} 
+                              />
+                            </div>
+                            <div>
+                              <label className={`block text-[10px] font-bold mb-1 ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Nearest Temple *</label>
+                              <select 
+                                value={currentGroupMember.nearestTemple} 
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setGroupMembers(groupMembers.map(m => m.id === currentGroupMember.id ? {...m, nearestTemple: val} : m));
+                                }}
+                                className={`w-full p-2 border rounded-lg text-xs font-bold ${darkMode ? 'bg-slate-800 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}
+                              >
+                                <option>Tirumala Balaji</option>
+                                <option>Tirupati Alipiri</option>
+                                <option>SV Temple</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === "renewal" && (
+                  <div className="space-y-4">
+                    <div className="space-y-1">
+                      <h3 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Renewal Pricing & Plans</h3>
+                      <p className="text-xs text-[#6B7280]">Select a subscription plan below to keep your Autofill Assistant active across all devices.</p>
+                    </div>
+
+                    <div className={`p-4 border rounded-2xl flex items-center gap-3 ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                      <input 
+                        type="text" 
+                        placeholder="Enter Coupon Code (e.g., DARSHAN2026)" 
+                        value={couponCode} 
+                        onChange={e => setCouponCode(e.target.value)} 
+                        className={`flex-1 p-2 border rounded-xl text-xs font-bold ${darkMode ? 'bg-slate-900 border-sky-700 text-[#FFFFFF]' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}
+                      />
+                      <button onClick={() => addToast(couponCode ? `Applied coupon: ${couponCode}` : "Please enter a coupon code")} className="px-4 py-2 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl font-bold text-xs shadow-sm">
+                        Apply Coupon
+                      </button>
+                      <button onClick={() => setShowDisclaimerModal(true)} className="px-4 py-2 bg-[#111827] hover:bg-black text-[#FFFFFF] rounded-xl font-bold text-xs shadow-sm">
+                        Terms & Conditions
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                      {[
+                        { duration: "7 Days", price: 99, tag: "Starter", popular: false },
+                        { duration: "30 Days", price: 199, tag: "Most Popular", popular: true },
+                        { duration: "3 Months", price: 299, tag: "Best Value", popular: false },
+                        { duration: "6 Months", price: 499, tag: "Maximum Savings", popular: false }
+                      ].map((plan, idx) => {
+                        const isSelected = selectedRenewalPlan.duration === plan.duration;
+                        return (
+                          <div 
+                            key={idx}
+                            onClick={() => setSelectedRenewalPlan(plan)}
+                            className={`p-4 border rounded-2xl cursor-pointer transition-all relative overflow-hidden flex flex-col justify-between ${
+                              isSelected 
+                                ? darkMode ? 'border-sky-500 bg-sky-950/60 shadow-md ring-2 ring-sky-500/30' : "border-[#0284C7] bg-[#E0F2FE] shadow-md ring-2 ring-[#0284C7]/20" 
+                                : darkMode ? 'border-sky-900 bg-slate-800 hover:bg-slate-700/60' : "border-[#E5E7EB] bg-[#FFFFFF] hover:bg-[#F0F9FF]/60 shadow-xs"
+                            }`}
+                          >
+                            {plan.popular && (
+                              <div className="absolute top-0 right-0 bg-[#0284C7] text-[#FFFFFF] text-[9px] font-extrabold px-2.5 py-0.5 rounded-bl-xl uppercase tracking-wider">
+                                {plan.tag}
+                              </div>
+                            )}
+
+                            <div className="space-y-1.5">
+                              <span className={`text-[10px] font-extrabold uppercase tracking-widest px-2 py-0.5 rounded-md inline-block ${darkMode ? 'bg-sky-900 text-sky-200' : 'text-[#0284C7] bg-[#E0F2FE]'}`}>
+                                {plan.tag && !plan.popular ? plan.tag : `${plan.duration} Access`}
+                              </span>
+                              <div className="flex items-baseline gap-1 pt-1">
+                                <span className={`text-2xl font-black ${darkMode ? 'text-white' : 'text-[#111827]'}`}>₹{plan.price}</span>
+                                <span className="text-[10px] text-[#6B7280] font-medium">/ {plan.duration.toLowerCase()}</span>
+                              </div>
+                              <p className="text-[11px] text-[#6B7280] font-medium">Full unlimited autofill access across all supported booking portals.</p>
+                            </div>
+
+                            <div className={`pt-3 mt-3 border-t flex items-center justify-between ${darkMode ? 'border-sky-900' : 'border-[#E5E7EB]'}`}>
+                              <span className={`text-[10px] font-bold ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>
+                                {isSelected ? "✓ Plan Selected" : "Click to Select"}
+                              </span>
+                              <button 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  addToast(`Successfully renewed ${plan.duration} pass for ₹${plan.price}!`);
+                                }}
+                                className="px-3.5 py-1.5 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl font-extrabold text-xs shadow-sm transition-all"
+                              >
+                                Pay ₹{plan.price}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === "backup" && (
+                  <div className="space-y-4">
+                    <div className={`p-5 rounded-2xl border shadow-md space-y-1 ${darkMode ? 'bg-slate-800 border-sky-800 text-white' : 'bg-[#FFFFFF] border-[#E5E7EB] text-[#111827]'}`}>
+                      <h2 className="text-lg font-black tracking-wide">Backup & Restore 💾</h2>
+                      <p className="text-xs text-[#6B7280]">Move your data to a new browser, or keep a safe copy. Backup files are created directly in your browser.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className={`p-5 border rounded-2xl space-y-3 shadow-sm ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                        <h4 className={`font-extrabold text-sm ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Export</h4>
+                        <p className="text-[11px] text-[#6B7280]">Your data includes ID numbers, so the backup is encrypted with a passphrase you choose.</p>
+                        
+                        <div className="space-y-1">
+                          <label className={`block text-[10px] font-bold ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Passphrase</label>
+                          <input type="password" placeholder="At least 6 characters" className={`w-full p-2 border rounded-xl text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-white' : 'border-[#E5E7EB]'}`} />
+                        </div>
+                        <div className="space-y-1">
+                          <label className={`block text-[10px] font-bold ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>Confirm passphrase</label>
+                          <input type="password" placeholder="Re-enter passphrase" className={`w-full p-2 border rounded-xl text-xs ${darkMode ? 'bg-slate-900 border-sky-700 text-white' : 'border-[#E5E7EB]'}`} />
+                        </div>
+
+                        <div className="p-2.5 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[11px] text-amber-700 dark:text-amber-300 flex items-center gap-2">
+                          <span>⚠️</span>
+                          <span>If you lose this passphrase, the backup cannot be opened. There is no recovery.</span>
+                        </div>
+
+                        <button onClick={() => addToast("Encrypted backup downloaded successfully!")} className="w-full py-2.5 bg-[#DC2626] hover:bg-[#B91C1C] text-[#FFFFFF] rounded-xl font-bold text-xs shadow-sm">
+                          Download encrypted backup
+                        </button>
+                      </div>
+
+                      <div className={`p-5 border rounded-2xl space-y-3 shadow-sm ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                        <h4 className={`font-extrabold text-sm ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Restore</h4>
+                        <p className="text-[11px] text-[#6B7280]">Import a backup file. You can preview it before anything changes.</p>
+                        
+                        <div className="space-y-2 pt-2">
+                          <input type="file" className="w-full text-xs text-[#6B7280] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border file:text-xs file:font-bold file:bg-[#F3F4F6] file:text-[#111827] cursor-pointer" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === "demo" && (
+                  <div className="space-y-4">
+                    <h3 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-[#111827]'}`}>How to Book (Step-by-Step Demo Guide)</h3>
+                    <div className={`p-4 border rounded-xl space-y-3 ${darkMode ? 'bg-slate-800 border-sky-800 text-slate-100' : 'bg-[#F0F9FF] border-[#E5E7EB] text-[#111827]'}`}>
+                      <p className={`font-bold text-sm ${darkMode ? 'text-sky-300' : 'text-[#0284C7]'}`}>📖 Step-by-Step Demonstration</p>
+                      <ol className="list-decimal pl-5 space-y-1.5 text-[#6B7280]">
+                        <li>Open the official booking portal in your browser tab.</li>
+                        <li>Open the extension popup and pick your saved Pilgrim Set (e.g., Family Pack).</li>
+                        <li>Click <strong>Fill & Continue (Alt + S)</strong> to instantly populate form fields.</li>
+                        <li>Review details, solve the CAPTCHA manually, and complete your secure booking.</li>
+                      </ol>
+                      <p className="text-[10px] text-[#9CA3AF] pt-2 border-t border-[#E5E7EB]">
+                        Disclaimer: This independent helper tool is not officially affiliated with temple trusts.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {dashboardTab === "legal_support" && (
+                  <div className="space-y-5">
+                    <div className="space-y-1">
+                      <h3 className={`text-base font-extrabold ${darkMode ? 'text-white' : 'text-[#111827]'}`}>Legal & Support Center</h3>
+                      <p className="text-xs text-[#6B7280]">Complete transparency terms, policies, guarantees, and support scope.</p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                      {[
+                        { title: "1. Independent Tool / No Affiliation", desc: "Clearly state that the extension is independently developed and is not affiliated with, endorsed by, sponsored by, or officially connected to TTD / Tirumala Tirupati Devasthanams. TTD names, logos, and trademarks belong to their respective owners.", icon: "🏛" },
+                        { title: "2. No Booking Guarantee", desc: "The extension only assists with user-entered data and does not guarantee ticket availability, successful booking, payment success, queue position, darshan, accommodation, or confirmation.", icon: "🎟️" },
+                        { title: "3. User-Controlled Autofill", desc: "Autofill happens only when the user manually clicks the relevant button. The extension does not automatically submit bookings, make payments, or perform final confirmation.", icon: "👆" },
+                        { title: "4. Security / Prohibited Functions", desc: "The extension does not solve CAPTCHA, bypass CAPTCHA, read OTPs without user action, bypass queues, circumvent security controls, or automate restricted booking steps.", icon: "🛡️" },
+                        { title: "5. User Responsibility", desc: "Users are responsible for checking all autofilled information before submission and for complying with the official website's rules, eligibility conditions, and terms.", icon: "📋" },
+                        { title: "6. Local Data Storage", desc: "Saved pilgrim/profile information is stored locally in the browser's storage where applicable. Nothing sensitive is transmitted to our servers.", icon: "💻" },
+                        { title: "7. Permissions Explanation", desc: "Permissions such as storage and activeTab are required strictly to persist your saved profiles and populate form fields on active TTD tabs.", icon: "⚙️" },
+                        { title: "8. Third-Party Website Disclaimer", desc: "The extension interacts with third-party websites but you do not control their availability, design changes, policies, downtime, or booking rules.", icon: "🌐" },
+                        { title: "9. Payments / Pass Terms", desc: "The paid pass unlocks premium autofill duration and features. Buying a pass does not buy any TTD ticket or official temple service.", icon: "💳" },
+                        { title: "10. Refund Policy", desc: "Refunds are handled on a case-by-case basis via our payment gateway. Please contact support within 48 hours if pass activation failed.", icon: "🔄" },
+                        { title: "11. Data Deletion", desc: "Users can clear all local data instantly via the Trust Center reset box or by clearing browser local storage.", icon: "🗑️" },
+                        { title: "12. Support Scope", desc: "Our support covers the extension itself, not official TTD booking disputes, ticket cancellations, refunds, darshan issues, or account problems on TTD's website.", icon: "🎧" }
+                      ].map((item, idx) => (
+                        <div key={idx} className={`p-4 border rounded-xl space-y-1.5 shadow-sm ${darkMode ? 'bg-slate-800 border-sky-800' : 'bg-[#FFFFFF] border-[#E5E7EB]'}`}>
+                          <div className="flex items-center gap-2">
+                            <span>{item.icon}</span>
+                            <h4 className={`font-extrabold text-xs ${darkMode ? 'text-white' : 'text-[#111827]'}`}>{item.title}</h4>
+                          </div>
+                          <p className="text-[11px] text-[#6B7280] leading-relaxed">{item.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Disclaimer Modal */}
+          {showDisclaimerModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#111827]/60 backdrop-blur-sm">
+              <div className={`w-full max-w-md p-6 rounded-2xl shadow-2xl ${darkMode ? 'bg-slate-900 border border-sky-800' : 'bg-[#FFFFFF] border border-[#E5E7EB]'}`}>
+                 <div className={`flex items-center justify-between mb-4 border-b pb-3 ${darkMode ? 'border-sky-800' : 'border-[#E5E7EB]'}`}>
+                   <h3 className={`font-black text-sm flex items-center gap-2 ${darkMode ? 'text-[#FFFFFF]' : 'text-[#111827]'}`}>
+                     <span className="text-xl">⚠️</span> Legal Disclaimer & Terms
+                   </h3>
+                   <button onClick={() => setShowDisclaimerModal(false)} className={`text-xl font-bold leading-none ${darkMode ? 'text-slate-400 hover:text-[#FFFFFF]' : 'text-[#6B7280] hover:text-[#111827]'}`}>&times;</button>
+                 </div>
+                 <p className={`text-xs leading-relaxed text-justify ${darkMode ? 'text-slate-300' : 'text-[#6B7280]'}`}>
+                   TTD Darshan Autofill is an independent browser extension designed to help users save and autofill information they provide. It is not affiliated with, endorsed by, sponsored by, or officially connected with Tirumala Tirupati Devasthanams (TTD). The extension does not guarantee ticket availability, booking confirmation, payment success, darshan, accommodation, or any other official service. Users are responsible for reviewing all information before submission and for complying with the rules and terms of the official TTD website.
+                 </p>
+                 <button onClick={() => setShowDisclaimerModal(false)} className="w-full mt-5 py-2.5 bg-[#0284C7] hover:bg-[#0369A1] text-[#FFFFFF] rounded-xl font-bold text-xs transition-colors shadow-sm">
+                   I Understand
+                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* Toast Notifications */}
+          <div className="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none">
+            {toasts.map(t => (
+              <div key={t.id} className={`px-4 py-3 rounded-lg shadow-lg font-bold text-sm flex items-center gap-2 animate-[slideIn_0.3s_ease-out] ${darkMode ? 'bg-sky-600 text-[#FFFFFF]' : 'bg-[#16A34A] text-[#FFFFFF]'}`}>
+                <span>✓</span>
+                <span>{t.msg}</span>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      );
+    }
+
+    const container = document.getElementById('root');
+    if (container) {
+      ReactDOM.createRoot(container).render(<App />);
+    }
+  </script>
+</body>
+</html>
